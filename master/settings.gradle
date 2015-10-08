@@ -1,0 +1,7 @@
+def workspaceDir = rootDir.parentFile
+
+workspaceDir.eachFile { dir ->
+	if (dir.directory && dir.name != 'master' && new File(dir, 'build.gradle').exists()) {
+		includeFlat dir.name
+	}
+}
