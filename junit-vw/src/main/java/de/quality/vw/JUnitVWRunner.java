@@ -1,4 +1,4 @@
-package de.quality.test;
+package de.quality.vw;
 
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;

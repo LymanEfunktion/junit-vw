@@ -1,14 +1,13 @@
-package de.quality.test;
+package de.quality.test.simple;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(JUnitVWRunner.class)
-public class VWTest {
+
+public class SimpleVWTest {
 
 	@Test
 	public void shouldJustFail() {
@@ -19,9 +18,8 @@ public class VWTest {
 	public void shouldFailAssert() {
 		assertThat(true, is(false));
 	}
-	
+
 	@Test
-	//(expected = RuntimeException.class)
 	public void shouldThrowException() {
 		throw new RuntimeException();
 	}
