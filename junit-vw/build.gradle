@@ -17,9 +17,5 @@ publishing {
 	repositories { mavenLocal() }
 }
 
-jar {
-	manifest { attributes("Premain-Class" : "de.quality.vw.JunitAgent") }
-}
-
 group = 'de.quality'
-version = '3.0'
+version = '4.0'

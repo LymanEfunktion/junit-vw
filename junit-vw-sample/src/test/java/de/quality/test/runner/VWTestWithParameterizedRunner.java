@@ -9,7 +9,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.junit.runners.Parameterized.UseParametersRunnerFactory;
+import org.junit.runners.parameterized.BlockJUnit4ClassRunnerWithParametersFactory;
 
+@UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 @RunWith(Parameterized.class)
 public class VWTestWithParameterizedRunner {
 

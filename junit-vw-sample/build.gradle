@@ -1,16 +1,18 @@
 import javassist.bytecode.AnnotationsAttribute
+import javassist.bytecode.AttributeInfo
 import javassist.bytecode.ClassFile
 import javassist.bytecode.ConstPool
-import javassist.bytecode.MethodInfo
 import javassist.bytecode.annotation.Annotation
 import javassist.bytecode.annotation.ClassMemberValue
-
+import de.quality.vw.JUnitVWRunner
+import de.quality.vw.ParameterizedJUnitVWRunner
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
 dependencies {
-	testCompile 'de.quality:junit-vw:3.0'
+	testCompile 'de.quality:junit-vw:4.0'
+	testCompile 'javassist:javassist:3.12.1.GA'
 	testCompile 'junit:junit:4.12'
 	testCompile 'org.hamcrest:hamcrest-core:1.3'
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
@@ -28,51 +30,41 @@ buildscript {
 		mavenLocal()
 	}
 	dependencies {
-		classpath 'de.quality:junit-vw:3.0'
+		classpath 'de.quality:junit-vw:4.0'
 		classpath 'javassist:javassist:3.12.1.GA'
-		classpath 'net.bytebuddy:byte-buddy:1.4.16'
-		classpath 'net.bytebuddy:byte-buddy-agent:1.4.16'
 	}
 }
 
-test { jvmArgs "-javaagent:C:/users/xce3518/.m2/repository/de/quality/junit-vw/3.0/junit-vw-3.0.jar" }
-
-task changeTest {
-
-	doLast {
+test {
+	doFirst {
 		FileTree tree = fileTree('build/classes/test').include('**/**.class')
 		tree.each { file ->
 			ClassFile clazz = new ClassFile(new DataInputStream(new FileInputStream(file)))
-			println clazz.getName()
-			ConstPool cp = clazz.getConstPool()
-			AnnotationsAttribute attr = null
-			List<AnnotationsAttribute> attributes = clazz.getAttributes()
-			for (int i=0;i<attributes.size();i++) {
-				if (AnnotationsAttribute.visibleTag.equals(attributes.get(i).getName())) {
-					attr = attributes.get(i)
-					if (attr.getAnnotations()) {
-						for (Annotation an : attr.getAnnotations()) {
+			ConstPool pool = clazz.getConstPool()
+			AnnotationsAttribute runWithAnnotation
+			ClassMemberValue runner
+			clazz.getAttributes().each { attribute ->
+				if (isRuntimeAnnotation(attribute)) {
+					runWithAnnotation = attribute
+					if (runWithAnnotation.getAnnotations()) {
+						for (Annotation an : runWithAnnotation.getAnnotations()) {
 							if (an.getTypeName().equals("org.junit.runner.RunWith")) {
-								println "runWith " + an.getMemberValue("value")
+								runner = an.getMemberValue("value")
 							}
 						}
 					}
 				} else {
-					attr = new AnnotationsAttribute(cp, AnnotationsAttribute.visibleTag)
+					runWithAnnotation = new AnnotationsAttribute(pool, AnnotationsAttribute.visibleTag)
 				}
 			}
-			List<MethodInfo> methods = clazz.getMethods()
-			methods.each {
-				List<AnnotationsAttribute> mAttr = it.getAttributes()
-				for (int i=0;i<mAttr.size();i++) {
-					if (AnnotationsAttribute.visibleTag.equals(mAttr.get(i).getName())) {
-						if (mAttr.get(i).getAnnotations()) {
-							for (Annotation an : mAttr.get(i).getAnnotations()) {
+			clazz.getMethods().each {
+				it.getAttributes().each { attribute ->
+					if (isRuntimeAnnotation(attribute)) {
+						if (attribute.getAnnotations()) {
+							for (Annotation an : attribute.getAnnotations()) {
 								if (an.getTypeName().equals("org.junit.Test")) {
-									Annotation a = new Annotation("org.junit.runner.RunWith", cp);
-									a.addMemberValue("value", new ClassMemberValue("de.quality.vw.JUnitVWRunner", cp));
-									attr.addAnnotation(a);
-									clazz.addAttribute(attr);
+									runWithAnnotation.addAnnotation(vwRunnerAnnotationFor(runner, pool));
+									clazz.addAttribute(runWithAnnotation);
 									clazz.write(new DataOutputStream(new FileOutputStream(file)))
 									break
 								}
@@ -81,10 +73,21 @@ task changeTest {
 					}
 				}
 			}
-			println "-----"
 		}
 	}
 }
 
-changeTest.dependsOn testClasses
-test.dependsOn changeTest
+boolean isRuntimeAnnotation(AttributeInfo attribute) {
+	return AnnotationsAttribute.visibleTag.equals(attribute.getName())
+}
+
+boolean isParameterizedRunner(ClassMemberValue clazz) {
+	return "org.junit.runners.Parameterized".equals(clazz?.getValue())
+}
+
+Annotation vwRunnerAnnotationFor(ClassMemberValue clazz, ConstPool cp) {
+	Annotation annotation = new Annotation("org.junit.runner.RunWith", cp);
+	String runnerClass = isParameterizedRunner(clazz) ? ParameterizedJUnitVWRunner.class.getName() : JUnitVWRunner.class.getName()
+	annotation.addMemberValue("value", new ClassMemberValue(runnerClass, cp));
+	return annotation
+}

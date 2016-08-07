@@ -4,14 +4,15 @@ import org.junit.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.parameterized.BlockJUnit4ClassRunnerWithParameters;
+import org.junit.runners.parameterized.TestWithParameters;
 
-public class JUnitVWRunner extends BlockJUnit4ClassRunner {
+public class JUnitVWRunnerWithParameters extends BlockJUnit4ClassRunnerWithParameters {
 
-	public JUnitVWRunner(Class<?> klass) throws InitializationError {
-		super(klass);
+	public JUnitVWRunnerWithParameters(TestWithParameters test) throws InitializationError {
+		super(test);
 	}
 
 	@Override
