@@ -1,0 +1,37 @@
+package de.quality.gradle.plugins.passing.tests.samples.runner;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.junit.runners.Parameterized.UseParametersRunnerFactory;
+import org.junit.runners.parameterized.BlockJUnit4ClassRunnerWithParametersFactory;
+
+@UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+@RunWith(Parameterized.class)
+public class TestsWithParameterizedRunner {
+
+	@Parameters
+	public static Collection<Object[]> data() {
+		return Arrays.asList(new Object[][] { { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 } });
+	}
+
+	private int actual;
+
+	private int expected;
+
+	public TestsWithParameterizedRunner(int input, int expected) {
+		this.actual = input;
+		this.expected = expected;
+	}
+
+	@Test
+	public void test() {
+		assertEquals(expected, actual);
+	}
+}

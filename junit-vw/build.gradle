@@ -1,11 +1,28 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'groovy'
+
+sourceSets { samples { java } }
+
+configurations { samplesCompile.extendsFrom compile }
+
 
 dependencies {
 	compile 'junit:junit:4.12'
-	compile 'net.bytebuddy:byte-buddy:1.4.16'
-	//    compile 'javassist:javassist:3.12.1.GA'
+	compile 'javassist:javassist:3.12.1.GA'
+
+	testCompile 'org.hamcrest:hamcrest-core:1.3'
+	testCompile 'org.hamcrest:hamcrest-library:1.3'
+	testCompile 'org.mockito:mockito-core:1.10.19'
+
+	compile gradleApi()
+
+	compile gradleTestKit()
+
+	samplesCompile 'junit:junit:4.12'
+	samplesCompile 'org.hamcrest:hamcrest-core:1.3'
+	samplesCompile 'org.hamcrest:hamcrest-library:1.3'
 }
 
 repositories { jcenter() }
@@ -16,6 +33,8 @@ publishing {
 	}
 	repositories { mavenLocal() }
 }
+
+test.dependsOn(samplesClasses)
 
 group = 'de.quality'
 version = '4.0'

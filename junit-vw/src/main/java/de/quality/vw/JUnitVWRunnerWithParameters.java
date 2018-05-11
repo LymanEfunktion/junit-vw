@@ -1,6 +1,5 @@
 package de.quality.vw;
 
-import org.junit.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
@@ -26,8 +25,8 @@ public class JUnitVWRunnerWithParameters extends BlockJUnit4ClassRunnerWithParam
 			eachNotifier.fireTestStarted();
 			try {
 				methodBlock(method).evaluate();
-			} catch (AssumptionViolatedException e) {
 			} catch (Throwable e) {
+				// do nothing
 			} finally {
 				eachNotifier.fireTestFinished();
 			}
